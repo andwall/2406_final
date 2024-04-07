@@ -2,13 +2,52 @@
 <html>
 <head> 
   <title> {{title}} </title>
+  <style>
+      .main-container{
+         padding: 25px;
+      }
+
+      #users {
+         font-family: Arial, Helvetica, sans-serif;
+         border-collapse: collapse;
+         width: 100%;
+      }
+
+      #users td, #users th {
+         border: 1px solid #ddd;
+         padding: 8px;
+      }
+      #users tr:nth-child(even){background-color: #f2f2f2;}
+      #users tr:hover {background-color: #ddd;}
+      #users th {
+         padding-top: 12px;
+         padding-bottom: 12px;
+         text-align: left;
+         background-color: #2c67d2;
+         color: white;
+      }
+  </style>
 </head>
 <body>
+<div class="main-container"> 
    <h1>{{title}}</h1>
-<div> 
-   {{#each userEntries}} 
-      <p>UserID: {{this.userid}}  Password: {{this.password}}</a></p> 
-   {{/each}} 
+   <table id="users">
+         <tr>
+            <th>User Id</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Password</th>
+         </tr>
+         {{#each userEntries}} 
+            <tr>
+               <td>{{this.userid}}</td>
+               <td>{{this.name}}</td>
+               <td>{{this.email}}</td>
+               <td>{{this.password}}</td>
+            </tr>
+            {{!-- <p>UserID: {{this.userid}} |  Name: {{this.name}}  |  Email: {{this.email}}  |  Password: {{this.password}}</a></p>  --}}
+         {{/each}} 
+   </table>
 </div>
 </body>
 </html>

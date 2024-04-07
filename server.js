@@ -31,9 +31,10 @@ app.set('view engine', 'hbs'); //use hbs handlebars wrapper
 app.locals.pretty = true; //to generate pretty view-source code in browser
 
 //read routes modules
-var routes = require('./routes/index');
-let authRouter = require('./routes/authRouter');
-let authChecker = require('./routes/auth')
+const routes = require('./routes/index');
+const authRouter = require('./routes/authRouter');
+const {authChecker, adminAuthChecker} = require('./routes/auth')
+const exerciseApi = require('./routes/exerciseApi');
 
 /* Middleware */
 // app.use(routes.authenticate); //authenticate user
@@ -51,24 +52,25 @@ app.use(session({
 		httpOnly: true,
 		sameSite: 'lax',
 		expires: 1000 * 60 * 24 * 7 //one week
-	}
+	},
 }))
 
 /* Authentication */
-let protected = [authChecker];
-// app.use(authChecker)
+const protected = [authChecker];
+const adminProtected = [adminAuthChecker]
 app.use('/auth', authRouter);
-// app.use('/', routes.authChecker, routes.authenticate);
 
-/* Routes */
 /* Public Routes */
 app.get('/', routes.login);
 app.get('/login', routes.login);
 app.get('/register', routes.register);
-// app.get('/index.html', routes.index);
+app.get('/logout', routes.logout)
 
 /* Private routes */
+app.get('/home', protected, routes.home);
 app.get('/songs', protected, routes.find);
+app.use('/users', adminProtected, routes.users);
+app.use('/api', protected, exerciseApi);
 // app.get('/users', routes.users);
 // app.get('/song/*', routes.songDetails);
 
