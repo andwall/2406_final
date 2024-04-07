@@ -26,18 +26,35 @@
 				<li class="nav-item active">
 					<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
 				</li>
-				<li class="nav-item">
-					<a class="nav-link" id="login" href="/login">Login</a>
+				{{#if isLoggedIn}}
+				<li class="nav-itme">
+					<a class="nav-link" id="logout-btn" href="/logout">Logout</a>
 				</li>
-				<li class="nav-item">
-					<a class="nav-link" id="sign-up" href="/register">Register</a>
-				</li>
+				{{else}}
+					<li class="nav-item">
+						<a class="nav-link" id="login" href="/login">Login</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" id="sign-up" href="/register">Register</a>
+					</li>
+				{{/if}}
+
+				{{#if isAdmin}}
+					<li class="nav-item">
+						<a class="nav-link" id="users" href="/users">Users</a>
+					</li>
+				{{/if}}
 			</ul>
 		</div>
 	</nav>
 	<main>
-		{{{body}}}
+		<div class="main-container p-4">
+			{{{body}}}
+		</div>
 	</main>
-	{{> footer}}
+	<hr>
+	<div class="p-2">
+		{{> footer}}
+	</div>
 </body>
 </html>

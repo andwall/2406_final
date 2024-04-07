@@ -1,89 +1,83 @@
 
-var url = require('url');
-var sqlite3 = require('sqlite3').verbose(); //verbose provides more detailed stack trace
-var db = new sqlite3.Database('data/db_1200iRealSongs');
+const url = require('url');
+const sqlite3 = require('sqlite3').verbose(); //verbose provides more detailed stack trace
+// var db = new sqlite3.Database('data/db_1200iRealSongs');
+const db = new sqlite3.Database('data/fitness_tracker');
 
-/* Init database */
-db.serialize(function(){
-	var sqlString = "CREATE TABLE IF NOT EXISTS users (userid TEXT PRIMARY KEY, password TEXT)";
-	db.run(sqlString);
-	sqlString = "INSERT OR REPLACE INTO users VALUES ('andrew', 'secret')";
-	db.run(sqlString);
-	sqlString = "INSERT OR REPLACE INTO users VALUES ('frank', 'secret2')";
-	db.run(sqlString);
-});
 
 /* Authenticate user */
-exports.authenticate = function (request, response, next){
-	let auth = request.headers.authorization;
-	if(!auth){
- 	 	//note here the setHeader must be before the writeHead
-		// response.setHeader('WWW-Authenticate', 'Basic realm="need to login"');
-		// response.writeHead(401, {'Content-Type': 'text/html'});
-		// console.log('No authorization found, send 401.');
-		response.render('login')
- 		// response.end();
-	}else{
-		console.log("Authorization Header: " + auth);
-		let tmp = auth.split(' '); // decode authorization header
-    let buf = Buffer.from(tmp[1], 'base64'); //create a buffer and tell it the data coming in is base64
-		let plain_auth = buf.toString(); //read it back out as a string
-		console.log("Decoded Authorization ", plain_auth);
+// exports.authenticate = function (request, response, next){
+// 	let auth = request.headers.authorization;
+// 	if(!auth){
+//  	 	//note here the setHeader must be before the writeHead
+// 		// response.setHeader('WWW-Authenticate', 'Basic realm="need to login"');
+// 		// response.writeHead(401, {'Content-Type': 'text/html'});
+// 		// console.log('No authorization found, send 401.');
+// 		response.render('login')
+//  		// response.end();
+// 	}else{
+// 		console.log("Authorization Header: " + auth);
+// 		let tmp = auth.split(' '); // decode authorization header
+//     let buf = Buffer.from(tmp[1], 'base64'); //create a buffer and tell it the data coming in is base64
+// 		let plain_auth = buf.toString(); //read it back out as a string
+// 		console.log("Decoded Authorization ", plain_auth);
 
-		//extract the userid and password as separate strings
-		let credentials = plain_auth.split(':');      // split on a ':'
-		let username = credentials[0];
-		let password = credentials[1];
-		console.log("User: ", username);
-		console.log("Password: ", password);
+// 		//extract the userid and password as separate strings
+// 		let credentials = plain_auth.split(':');      // split on a ':'
+// 		let username = credentials[0];
+// 		let password = credentials[1];
+// 		console.log("User: ", username);
+// 		console.log("Password: ", password);
 
-		let authorized = false;
-		db.all("SELECT userid, password FROM users", function(err, rows){ // check user exists
-			for(let i = 0; i < rows.length; i++){
-				if(rows[i].userid == username & rows[i].password == password) authorized = true;
-			}
-			if(authorized == false){
-				//we had an authorization header by the user:password is not valid
-				response.setHeader('WWW-Authenticate', 'Basic realm="need to login"');
-				response.writeHead(401, {'Content-Type': 'text/html'});
-				console.log('No authorization found, send 401.');
-				response.end();
-			}else{ //valid user
-				next();
-			}
-		});
-	}
-	//notice no call to next()
-}
+// 		let authorized = false;
+// 		db.all("SELECT userid, password FROM users", function(err, rows){ // check user exists
+// 			for(let i = 0; i < rows.length; i++){
+// 				if(rows[i].userid == username & rows[i].password == password) authorized = true;
+// 			}
+// 			if(authorized == false){
+// 				//we had an authorization header by the user:password is not valid
+// 				response.setHeader('WWW-Authenticate', 'Basic realm="need to login"');
+// 				response.writeHead(401, {'Content-Type': 'text/html'});
+// 				console.log('No authorization found, send 401.');
+// 				response.end();
+// 			}else{ //valid user
+// 				next();
+// 			}
+// 		});
+// 	}
+// 	//notice no call to next()
+// }
 
 exports.register = function(req, res, next){
-	res.render('register');
+	res.render('register', {isLoggedIn: req.session.isLoggedIn, isAdmin: req.session.user ? req.session.user.role === 'admin' : false});
 }
 
 exports.login = function(req, res, next){
-	res.render('login');
+	// res.render('login', {isLoggedIn: req.session.isLoggedIn});
+	res.render('login', {isLoggedIn: req.session.isLoggedIn, isAdmin: req.session.user ? req.session.user.role === 'admin' : false});
 }
 
-function addHeader(request, response){
-	var title = 'COMP 2406:';
-	response.writeHead(200, {'Content-Type': 'text/html'});
-	response.write('<!DOCTYPE html>');
-	response.write('<html><head><title>About</title></head>' + '<body>');
-	response.write('<h1>' +  title + '</h1>');
-	response.write('<hr>');
+exports.logout = function(req, res, next){
+	if (req.session) {
+    req.session.destroy(err => {
+      if (err) {
+        res.status(400).send('Unable to log out');
+      } else {
+        // res.send('Logout successful');
+				res.render('login', {isLoggedIn: false, isAdmin: false})
+      }
+    });
+  } else {
+    res.end();
+  }
 }
 
-function addFooter(request, response){
-	response.write('<hr>');
-	response.write('<h3>' +  'Carleton University' + '</h3>');
-	response.write('<h3>' +  'School of Computer Science' + '</h3>');
-	response.write('</body></html>');
+exports.home = (req, res) => {
+	res.render('home', {title: 'COMP2406 Final', name: req.session.user.name, isAdmin: req.session ? req.session.user.role === 'admin' : false, isLoggedIn: req.session.isLoggedIn, mainContent: 'Hello world'})
 }
 
-
-
-exports.index = function (request, response){
-	response.render('index', { title: 'COMP 2406', body: 'rendered with handlebars'});
+exports.index = function (req, res){
+	res.render('index', { title: 'COMP 2406', isAdmin: req.session ? req.session.user.role === 'admin' : false, isLoggedIn: req.session.isLoggedIn, body: 'rendered with handlebars'});
 }
 
 function parseURL(request, response){
@@ -97,9 +91,13 @@ function parseURL(request, response){
 	return urlObj;
 }
 
-exports.users = function(request, response){
-	db.all("SELECT userid, password FROM users", function(err, rows){
-		response.render('users', {title : 'Users:', userEntries: rows});
+exports.users = function(req, res){
+	db.all("SELECT * FROM users", function(err, rows){
+		if (err) {
+			return res.status(500).send('Database error occurred');
+		}
+		console.log('users ')
+		res.render('users', {title : 'Users', userEntries: rows, isLoggedIn: req.session.isLoggedIn, isAdmin: req.session ? req.session.user.role === 'admin' : false });
 	})
 }
 
@@ -116,7 +114,7 @@ exports.find = function (request, response){
 	}
 
 	db.all(sql, function(err, rows){
-		response.render('songs', {title: 'Songs:', songEntries: rows});
+		response.render('songs', {title: 'Songs:', isLoggedIn: request.session.isLoggedIn, songEntries: rows});
 	});
 }
 
