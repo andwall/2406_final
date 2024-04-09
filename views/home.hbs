@@ -1,48 +1,77 @@
+{{!-- 
+  File: home.hbs
+  Purpose: responsible for displaying the main user dashboard 
+ --}}
 <div class="main-content">
   <h2>Welcome back, {{name}}</h2>
-  <p>{{mainContent}}</p>
+  <sl-tab-group>
+    <sl-tab slot="nav" panel="yourExercises">Your Exercises</sl-tab>
+    <sl-tab slot="nav" panel="browseExercises">Browse Exercises</sl-tab>
+    <sl-tab slot="nav" panel="createExercise">Create Exercise</sl-tab>
 
-  <a href="/api/exercise">Get exercises</a>
-  
-  <div class="accordion" id="mainAccordion">
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="exercises">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-        Your Exercises
-      </button>
-    </h2>
-    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="exercises" data-bs-parent="#mainAccordion">
-      <div class="accordion-body">
-        <p>Show current exercises</p>
+    {{!-- Your Exercises --}}
+    <sl-tab-panel name="yourExercises">
+      <table class="table table-responsive">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Sets</th>
+            <th scope="col">Reps</th>
+            <th scope="col">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each userExercises}} 
+          <tr>
+              <td>{{this.name}}</td>
+              <td>{{this.sets}}</td>
+              <td>{{this.reps}}</td>
+              <td>{{this.date}}</td>
+          </tr>
+          {{/each}} 
+        </tbody>
+      </table>          
+    </sl-tab-panel>
+
+    {{!-- Browse Exercises --}}
+    <sl-tab-panel name="browseExercises">    
+      <div class="d-flex flex-wrap">
+        {{#each browseExercises}}
+        <div class="col-sm-6 p-2">
+          <div class="card" >
+              <img class="card-img-top" src="{{this.img}}">
+              <div class="card-body">
+                <h5 class="card-title">{{this.displayName}}</h5>
+                <a href="/exercise/search?muscleGroup={{this.searchName}}" class="btn btn-primary">Browse</a>
+              </div>
+          </div> 
+        </div>
+        {{/each}} 
       </div>
-    </div>
-  </div>
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="searchExercises">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-       Search Exercises 
-      </button>
-    </h2>
-    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="searchExercises" data-bs-parent="#mainAccordion">
-      <div class="accordion-body">
-        <label for="searchExercisesInput">Search Exercise</label>
-        <input type="text" id="searchExercisesInput" />
-      </div>
-    </div>
-  </div>
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="headingThree">
-      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-        Accordion Item #3
-      </button>
-    </h2>
-    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
-        <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
-      </div>
-    </div>
-  </div>
+    </sl-tab-panel>
+
+    {{!-- Create exercise --}}
+    <sl-tab-panel name="createExercise">
+      <form class="p-2" action="/user/exercise" method="post">
+        <div class="mb-3">
+          <label for="exerciseName" class="form-label">Exercise Name</label>
+          <input name="name" type="text" class="form-control" id="exerciseName">
+        </div>
+        <div class="mb-3">
+          <label for="sets" class="form-label">Sets</label>
+          <input name="sets" type="number" class="form-control" id="sets">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="reps">Reps</label>
+          <input name="reps" type="text" class="form-control" id="reps">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="date">Date</label>
+          <input name="date" type="date" class="form-control" id="date">
+        </div>
+        <button type="submit" class="btn btn-primary">Create Exercise</button>
+      </form> 
+    </sl-tab-panel>
+  </sl-tab-group> 
+
 </div>
-
-</div>
-
