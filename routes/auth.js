@@ -1,3 +1,8 @@
+/**
+ * File: auth.js
+ * Purpose: defines middleware for: 1. checking if user is logged in, 2. checking if user is an admin  
+*/
+
 const authChecker = (req, res, next) => {
   if(req.session.isLoggedIn || req.path === '/auth'){
     next();
@@ -7,7 +12,6 @@ const authChecker = (req, res, next) => {
 }
 
 const adminAuthChecker = (req, res, next) => {
-  console.log(req.session)
   if(req.session.isLoggedIn || req.path === '/auth'){
     if(req.session.user){
       if(req.session.user.role === 'admin'){
